@@ -1,0 +1,13 @@
+{
+  "language": "C",
+  "name": "dtest",
+  "version": "0.1.0.0",
+  "license": "GPL-3.0",
+  "description": "Dtest header file for tested",
+  "homepage": "https://github.com/DenPus/dtest.git/#README.md",
+  "keywords": [
+    "C",
+    "test",
+    "assert"
+  ]
+}
