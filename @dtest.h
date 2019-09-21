@@ -53,7 +53,6 @@ typedef struct {
     char  *name;
     void  *fn;
     _Bool ok;
-    int   id;
     int   nassert;
     int   npass_assert;
     int   nerr_assert;
@@ -62,10 +61,25 @@ typedef struct {
 #define TS_EL(name) \\
      ts_el(&TS_EL2(name), test_##name)
 
-
-static char *tstype_str[7] = {
+static char *tstype_str[9] = {
+        "00",
         "==",
-        "!="
+        "!=",
+        "<",
+        "<=",
+        ">",
+        ">=",
+        "true",
+        "false",
+};
+
+static char*tstt_str[6] = {
+    "s",
+    "f",
+    "F",
+    "i",
+    "u",
+    "U",
 };
 
 typedef enum {
@@ -79,7 +93,7 @@ typedef enum {
     TS_ASSERT_FALSE = 8, // false
 }    tsassert_t;
 
-#define TS_ITEM_INFO  "    #%d :%d %s"
+#define TS_ITEM_INFO  "    #%d :%d %s  -  %s%s"
 #define TS_TPL_FILE        "\\n"
 #define _TS_TPL_IRES       TS_ITEM_INFO " %22d"
 #define TS_TPL_IRES        _TS_TPL_IRES " " TS_TPL_FILE
@@ -190,9 +204,9 @@ static char *tstime(char *passed, ts_case_t *el, tsitem_t *item) {
     double  elapsed = (double) time / CLOCKS_PER_SEC;
 
     if (elapsed < 1) {
-        sprintf(passed, "%7.3f ms", elapsed * 1e3);
+        sprintf(passed, "%10.4f ms", elapsed * 1e3);
     } else {
-        sprintf(passed, "%7.3f s", elapsed);
+        sprintf(passed, "%10.4f s", elapsed);
     }
 
     return passed;
@@ -263,6 +277,8 @@ ts_assert_nr_int(ts_case_t *el, tsitem_t *item, int expect, int res) {
                 item->id,
                 item->line,
                 passed,
+                tstt_str[3],
+                tstype_str[item->tassert],
                 res
         );
     } else {
@@ -271,6 +287,8 @@ ts_assert_nr_int(ts_case_t *el, tsitem_t *item, int expect, int res) {
                 item->id,
                 item->line,
                 passed,
+                tstt_str[3],
+                tstype_str[item->tassert],
                 res,
                 expect
         );
@@ -337,6 +355,8 @@ ts_assert_dbl(ts_case_t *el, tsitem_t *item, double expect, double res) {
                 TS_ITEM_INFO " res %f" TS_TPL_FILE,
                 item->id,
                 item->line,
+                tstt_str[1],
+                tstype_str[item->tassert],
                 passed,
                 res
         );
@@ -346,6 +366,8 @@ ts_assert_dbl(ts_case_t *el, tsitem_t *item, double expect, double res) {
                 item->id,
                 item->line,
                 passed,
+                tstt_str[1],
+                tstype_str[item->tassert],
                 res,
                 expect
         );
@@ -374,7 +396,7 @@ ts_assert_str(ts_case_t *el, tsitem_t *item, char *expect, char *res) {
 
         break;
     case TS_ASSERT_NE:
-        ok = expect != res;
+        ok = strncmp(expect, res, nexpect);
 
         break;
     case TS_ASSERT_LT:
@@ -409,6 +431,8 @@ ts_assert_str(ts_case_t *el, tsitem_t *item, char *expect, char *res) {
                 item->id,
                 item->line,
                 passed,
+                tstt_str[0],
+                tstype_str[item->tassert],
                 nexpect,
                 res
         );
@@ -418,6 +442,8 @@ ts_assert_str(ts_case_t *el, tsitem_t *item, char *expect, char *res) {
                 item->id,
                 item->line,
                 passed,
+                tstt_str[0],
+                tstype_str[item->tassert],
                 nexpect,
                 res,
                 expect
@@ -446,24 +472,24 @@ static ts_suite_t *ts_suite_reg(ts_suite_t *suite, ...) {
 
 /* New suite */
 
-#define SUITE(...)                                                             \\
-static ts_suite_t suite = {                                                     \\
+#define SUITE(...)                                                            \\
+static ts_suite_t suite = {                                                   \\
     .version  = "@version",                                                   \\
-    .filename = __FILE__,                                                      \\
-    .fileline = __LINE__,                                                      \\
-    .cases    =  (void **)(ts_case_t *[PP_NARG(__VA_ARGS__)]) {0},              \\
-    .ncase    = PP_NARG(__VA_ARGS__),                                          \\
-    .nassert  = __COUNTER__                                                    \\
-};                                                                             \\
-                                                                               \\
-ts_suite_t *tssuite(void) {                                                     \\
+    .filename = __FILE__,                                                     \\
+    .fileline = __LINE__,                                                     \\
+    .cases    =  (void **)(ts_case_t *[PP_NARG(__VA_ARGS__)]) {0},            \\
+    .ncase    = PP_NARG(__VA_ARGS__),                                         \\
+    .nassert  = __COUNTER__                                                   \\
+};                                                                            \\
+                                                                              \\
+ts_suite_t *tssuite(void) {                                                   \\
     return ts_suite_reg(&suite, LOGG(PP_NARG(__VA_ARGS__), __VA_ARGS__));     \\
 }
 
 /* New case */
 
 #define CASE(_name)                                                           \\
-static ts_case_t _test_el_##_name = {                                          \\
+static ts_case_t _test_el_##_name = {                                         \\
     .name = #_name,                                                           \\
     .line = __LINE__,                                                         \\
 };                                                                            \\
