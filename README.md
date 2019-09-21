@@ -1,4 +1,4 @@
-dtest v0.1.1.0
+dtest v0.1.1.1
 ====================================
 Dtest header file for tested
 

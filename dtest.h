@@ -73,13 +73,13 @@ static char *tstype_str[9] = {
         "false",
 };
 
-static char*tstt_str[6] = {
-    "s",
-    "f",
-    "F",
-    "i",
-    "u",
-    "U",
+static char *tstt_str[6] = {
+        "s",
+        "f",
+        "F",
+        "i",
+        "u",
+        "U",
 };
 
 typedef enum {
@@ -91,9 +91,9 @@ typedef enum {
     TS_ASSERT_GE    = 6, // >=
     TS_ASSERT_TRUE  = 7, // true
     TS_ASSERT_FALSE = 8, // false
-}    tsassert_t;
+}           tsassert_t;
 
-#define TS_ITEM_INFO  "    #%d :%d %s  -  %s%s"
+#define TS_ITEM_INFO       "   %2d. #%d %s  -  %s%s"
 #define TS_TPL_FILE        "\n"
 #define _TS_TPL_IRES       TS_ITEM_INFO " %22d"
 #define TS_TPL_IRES        _TS_TPL_IRES " " TS_TPL_FILE
@@ -108,7 +108,7 @@ typedef struct {
     clock_t    tm;
     int        id;
     _Bool      ok;
-}    tsitem_t;
+}           tsitem_t;
 
 typedef ts_suite_t *(*ts_suite_fn)(void);
 
@@ -230,7 +230,7 @@ inline static ts_case_t *ts_el(ts_case_t *el, Ts_fn *fn) {
 
 static void
 ts_assert_nr_int(ts_case_t *el, tsitem_t *item, int expect, int res) {
-    char  passed[100];
+    char passed[100];
 
     tstime(passed, el, item);
 
@@ -309,7 +309,7 @@ ts_assert_nr_2s(ts_case_t *el, tsitem_t *item, int16_t expect, int16_t res) {
 
 static void
 ts_assert_dbl(ts_case_t *el, tsitem_t *item, double expect, double res) {
-    char  passed[100];
+    char passed[100];
 
     tstime(passed, el, item);
 
@@ -388,15 +388,19 @@ ts_assert_str(ts_case_t *el, tsitem_t *item, char *expect, char *res) {
     tstime(passed, el, item);
 
     _Bool  ok      = 0;
-    size_t nexpect = strlen(expect);
+    size_t nexpect = res ? strlen(expect) : 0;
 
     switch (item->tassert) {
     case TS_ASSERT_EQ:
-        ok = !strncmp(expect, res, nexpect);
+        if (res) {
+            ok = !strncmp(expect, res, nexpect);
+        }
 
         break;
     case TS_ASSERT_NE:
-        ok = strncmp(expect, res, nexpect);
+        if (res) {
+            ok = strncmp(expect, res, nexpect);
+        }
 
         break;
     case TS_ASSERT_LT:
@@ -474,7 +478,7 @@ static ts_suite_t *ts_suite_reg(ts_suite_t *suite, ...) {
 
 #define SUITE(...)                                                            \
 static ts_suite_t suite = {                                                   \
-    .version  = "0.1.1.0",                                                   \
+    .version  = "0.1.1.1",                                                   \
     .filename = __FILE__,                                                     \
     .fileline = __LINE__,                                                     \
     .cases    =  (void **)(ts_case_t *[PP_NARG(__VA_ARGS__)]) {0},            \
